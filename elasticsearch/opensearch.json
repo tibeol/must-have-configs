@@ -1,0 +1,121 @@
+{
+  "mappings": {
+    "properties": {
+      "text_field": {
+        "type": "text",
+        "analyzer": "custom_translate_analyzer",
+        "fields": {
+          "keyword": {
+            "type": "keyword",
+            "ignore_above": 256
+          },
+          "no_translate": {
+            "type": "text",
+            "analyzer": "custom_no_translate_analyzer"
+          }
+        },
+        "boost": 1.5,
+        "fielddata": false
+      },
+      "keyword_field": {
+        "type": "keyword",
+        "normalizer": "lowercase_normalizer"
+      },
+      "date_field": {
+        "type": "date",
+        "format": "yyyy-MM-dd HH:mm:ss||epoch_millis"
+      },
+      "long_field": {
+        "type": "long",
+        "coerce": false,
+        "index": true
+      },
+      "nested_object": {
+        "type": "nested",
+        "properties": {
+          "nested_field": {
+            "type": "text"
+          }
+        }
+      }
+    }
+  },
+  "settings": {
+    "analysis": {
+      "char_filter": {
+        "yo_to_e": {
+          "type": "mapping",
+          "mappings": ["ё => е", "Ё => Е"]
+        },
+        "keyboard_layout_filter": {
+          "type": "mapping",
+          "mappings": [
+            "q => й", "w => ц", "e => у", "r => к", "t => е",
+            "y => н", "u => г", "i => ш", "o => щ", "p => з",
+            "[ => х", "] => ъ", "a => ф", "s => ы", "d => в",
+            "f => а", "g => п", "h => р", "j => о", "k => л",
+            "l => д", "; => ж", "' => э", "z => я", "x => ч",
+            "c => с", "v => м", "b => и", "n => т", "m => ь",
+            ", => б", ". => ю", "Q => Й", "W => Ц", "E => У",
+            "R => К", "T => Е", "Y => Н", "U => Г", "I => Ш",
+            "O => Щ", "P => З", "{ => Х", "} => Ъ", "A => Ф",
+            "S => Ы", "D => В", "F => А", "G => П", "H => Р",
+            "J => О", "K => Л", "L => Д", ": => Ж", "\" => Э",
+            "Z => Я", "X => Ч", "C => С", "V => М", "B => И",
+            "N => Т", "M => Ь", "< => Б", "> => Ю"
+          ]
+        }
+      },
+      "tokenizer": {
+        "standard_tokenizer": {
+          "type": "standard"
+        },
+        "ngram_tokenizer": {
+          "type": "ngram",
+          "min_gram": 2,
+          "max_gram": 3,
+          "token_chars": ["letter", "digit"]
+        },
+        "edge_ngram_tokenizer": {
+          "type": "edge_ngram",
+          "min_gram": 2,
+          "max_gram": 5,
+          "token_chars": ["letter"]
+        }
+      },
+      "filter": {
+        "russian_stop": {
+          "type": "stop",
+          "stopwords": "_russian_"
+        },
+        "russian_stemmer": {
+          "type": "stemmer",
+          "language": "russian"
+        }
+      },
+      "analyzer": {
+        "custom_translate_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard_tokenizer",
+          "char_filter": ["yo_to_e", "keyboard_layout_filter"],
+          "filter": ["lowercase", "russian_stop", "russian_stemmer"]
+        },
+        "custom_no_translate_analyzer": {
+          "type": "custom",
+          "tokenizer": "standard_tokenizer",
+          "char_filter": ["yo_to_e"],
+          "filter": ["lowercase"]
+        }
+      },
+      "normalizer": {
+        "lowercase_normalizer": {
+          "type": "custom",
+          "filter": ["lowercase"]
+        }
+      }
+    },
+    "number_of_shards": 3,
+    "number_of_replicas": 1,
+    "refresh_interval": "30s"
+  }
+}
